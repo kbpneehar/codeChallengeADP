@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title> IceCream Locator Information </title>
+  <meta charset="UTF-8">
+  <script>
+    /*Appended https://cors-anywhere.herokuapp.com/ to the URLs for removing Cross-Origin-Reference blocks*/
+    var baseurl = "https://cors-anywhere.herokuapp.com/https://api.yelp.com/v3/businesses/search"
+    function loadIceCreambars() {
+      /*Used let for scope strictness, token generated from OAuth2 Yelp Fusion*/
+      let token = 'Bearer Mv_abC-LFTH-IlT-62GnoIAOFev0HYmLhP3IsLA3ZWEqxXz-YZKEa2nuc9mr9qofnHCHYoGHMS6nhWJdZy_R4dCLyAIUIKy3ntAI51aqJ7_4gbzbiDfet6BER9otYHYx'
+      var xmlhttp = new XMLHttpRequest();
+      /*Sending the requestparams with finding the Top 5 locations in Alpharetta, for IceCream stores*/
+      var params = "term=Ice Cream&location=Alpharetta&limit=5";
+      /*Constructing https://api.yelp.com/v3/businesses/search
+?term=Ice Cream&location=Alpharetta&limit=5*/
+      xmlhttp.open("GET", baseurl+"?"+params, true);
+      xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xmlhttp.setRequestHeader("Authorization", token);
+      xmlhttp.onreadystatechange = function() {
+        /*When XMLHttpRequest is DONE and Returns a SUCCESS CODE*/
+        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+          var icecreambars = JSON.parse(xmlhttp.responseText);
+          var thdr = '<table><tr><th>name</th><th>location</th><th>Review</th><th>Reviewer</th></tr>';
+          var main = "";
+          for (i = 0; i < icecreambars.length(); i++) {
+            /*Constructing the Review URL to get Review text excerpt and Review User Name from each Ice Cream Location in 1st iteration */
+            let Id=icecreambars[i].id;
+            var mainurl = "https://cors-anywhere.herokuapp.com/https://api.yelp.com/v3/businesses/"
+            /*ReviewURL=https://cors-anywhere.herokuapp.com/https://api.yelp.com/v3/businesses/{id}/reviews */
+            var reviewurl= mainurl + Id +'/reviews';
+            var xmlhttp1 = new XMLHttpRequest();
+            xmlhttp1.open("GET", reviewurl, true);
+            xmlhttp1.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xmlhttp1.setRequestHeader("Authorization", token);
+            /*Extracting review excerpt and reviewer name*/
+            var reviewerdata = JSON.parse(xmlhttp1.responseText);
+            tbdy += "<tr><td>" + icecreambars[i].name + "</td><td>" + icecreambars[i].location + "</td><td>" + reviewerdata.text + "</td><td>" + reviewerdata.user.name + "</td></tr>"
+          }
+          var tbtm = "</table>"
+          /*Completing the Table representation of Output data*/
+          var tbl = thdr + tbdy + tbtm;
+          /*Replacing actual body of the page with the contents constructed above */
+          document.getElementById("icecreambarsinfo").innerHTML = tbl;
+        }
+      };
+      xmlhttp.send();
+    }
+    /*Loading the entire page with the requested information in a table on page load*/
+    window.onload = function() {
+      loadIceCreambars();
+    }
+  </script>
+</head>
+
+<body>
+  <div id="icecreambarsinfo"> </div>
+</body>
+
+</html>
